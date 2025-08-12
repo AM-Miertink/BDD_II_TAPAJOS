@@ -14,23 +14,50 @@ CREATE TABLE IF NOT EXISTS empresas (
     empresa_bairro VARCHAR(50) NOT NULL,
     empresa_cidade VARCHAR(50) NOT NULL,
     empresa_estado VARCHAR(50) NOT NULL,
-    empresa_pais VARCHAR
     empresa_cep VARCHAR(10) NOT NULL
 );
 
--- Tabela de bancos
+-- Tabela de conta bancária
 CREATE TABLE IF NOT EXISTS bancos (
 	banco_id INT PRIMARY KEY AUTO_INCREMENT,
+	empresa_id INT NOT NULL,
     banco_cod VARCHAR(3) NOT NULL,
-    
-
--- Tabela de contas a pagar
-CREATE TABLE IF NOT EXISTS contas_pagar (
-	id_conta_pagar INT PRIMARY KEY AUTO_INCREMENT,
-    id_empresa INT NOT NULL,
-    valor_conta_pagar DECIMAL(7, 2) NOT NULL,
-    data_conta_pagar DATE NOT NULL,
-    FOREIGN KEY (id_empresa) REFERENCES empresas(id_empresa)
+	banco_agencia VARCHAR(20) NOT NULL,
+    banco_num_conta VARCHAR(20) NOT NULL,
+    banco_digito_conta VARCHAR(2) NOT NULL,
+	banco_tipo_conta ENUM('Corrente', 'Poupança', 'Pagamento') NOT NULL,
+    banco_saldo DECIMAL(15,2),
+	CONSTRAINT fk_empresa FOREIGN KEY (empresa_id) REFERENCES empresas(empresa_id)
 );
 
--- Tabela de conta bancária
+-- Tabela de contas a pagar
+CREATE TABLE IF NOT EXISTS contas_a_pagar (
+	pag_id INT PRIMARY KEY AUTO_INCREMENT,
+    empresa_id INT NOT NULL,
+	banco_id INT NOT NULL,
+	pag_fornecedor VARCHAR(100) NOT NULL,
+    pag_descricao TEXT NOT NULL,
+    pag_valor DECIMAL(7,2) NOT NULL,
+    pag_data_emissao DATE NOT NULL,
+    pag_data_vencimento DATE NOT NULL,
+    pag_data_pagamento DATE,
+    pag_status ENUM('Pendente', 'Pago', 'Atrasado', 'Cancelado'),
+    CONSTRAINT fk_empresa_pag FOREIGN KEY (empresa_id) REFERENCES empresas(empresa_id),
+    CONSTRAINT fk_banco_pag FOREIGN KEY (banco_id) REFERENCES bancos(banco_id)	
+);
+
+-- Tabela de pagamentos a receber
+CREATE TABLE IF NOT EXISTS contas_a_receber (
+	rec_id INT PRIMARY KEY AUTO_INCREMENT,
+    empresa_id INT NOT NULL,
+	banco_id INT NOT NULL,
+	rec_cliente VARCHAR(100) NOT NULL,
+    rec_descricao TEXT NOT NULL,
+    rec_valor DECIMAL(7,2) NOT NULL,
+    rec_data_emissao DATE NOT NULL,
+    rec_data_vencimento DATE NOT NULL,
+    rec_data_recebimento DATE,
+    rec_status ENUM('Pendente', 'Recebido', 'Atrasado', 'Cancelado'),
+    CONSTRAINT fk_empresa_rec FOREIGN KEY (empresa_id) REFERENCES empresas(empresa_id),
+    CONSTRAINT fk_banco_rec FOREIGN KEY (banco_id) REFERENCES bancos(banco_id)	
+);
